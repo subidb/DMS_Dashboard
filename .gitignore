@@ -41,3 +41,65 @@ AI Project - PO & Invoices/
 # IDE/editor junk
 .idea/
 *.swp
+.vscode/
+
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Python virtual environments and distributions
+*.egg-info/
+dist/
+eggs/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Uploads and processed files
+uploads/
+processed/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentation files (except main README)
+*.md
+!/README.md
+
+# TypeScript build info
+*.tsbuildinfo
+
+# OS files
+Thumbs.db
+
+# Test and temporary files
+*.html
+test_*.py
+test_*.sh
+*.sh
+
+# Start scripts
+start.py
+start_*.sh
+
+# Database files
+*.db
+dms_database.db
+
+# Configuration examples (not actual configs)
+env.example
+
+# Processed JSON files
+processed/
+backend/processed/
