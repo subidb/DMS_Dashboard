@@ -11,9 +11,9 @@ export function UtilizationChart({
     <div className="rounded-2xl border border-slate-900/60 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/30">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">PO Utilization</h3>
+          <h3 className="text-lg font-semibold text-white">Monthly Document Activity</h3>
           <p className="text-sm text-slate-400">
-            Monthly caps consumed across client and vendor POs.
+            Total document amounts created per month (in thousands).
           </p>
         </div>
       </div>
@@ -42,14 +42,14 @@ export function UtilizationChart({
             <Area
               type="monotone"
               dataKey="client"
-              name="Client POs"
+              name="Client Documents"
               stroke="#38bdf8"
               fill="url(#colorClient)"
             />
             <Area
               type="monotone"
               dataKey="vendor"
-              name="Vendor POs"
+              name="Vendor Documents"
               stroke="#a855f7"
               fill="url(#colorVendor)"
             />

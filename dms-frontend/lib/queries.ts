@@ -11,7 +11,10 @@ export function useDashboardQuery() {
   return useQuery({
     queryKey: ["dashboard"],
     queryFn: fetchDashboardInsights,
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 10, // 10 seconds - consider data stale quickly
+    refetchInterval: 1000 * 30, // Auto-refresh every 30 seconds for real-time updates
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
+    refetchOnMount: true // Always refetch on mount
   });
 }
 
@@ -52,6 +55,7 @@ export function useAlertsQuery() {
       const { alerts } = await fetchAlerts();
       return alerts;
     },
-    staleTime: 1000 * 30
+    staleTime: 1000 * 10, // 10 seconds - refresh more frequently for real-time alerts
+    refetchInterval: 1000 * 30 // Auto-refresh every 30 seconds
   });
 }

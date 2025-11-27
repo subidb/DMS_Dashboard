@@ -42,7 +42,25 @@ export function ProcessedDocumentsViewer() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/processed-documents/`);
       const data = await response.json();
-      setDocuments(data.documents || []);
+      const allDocuments = data.documents || [];
+      
+      // Deduplicate documents by document_id, title+amount, or title+client+amount
+      const seen = new Set<string>();
+      const deduplicated = allDocuments.filter((doc: ProcessedDocument) => {
+        // Create unique key for deduplication
+        const key1 = doc.document_id;
+        const key2 = `${doc.extracted_data.title}_${doc.extracted_data.amount}_${doc.extracted_data.client}`;
+        
+        if (seen.has(key1) || seen.has(key2)) {
+          return false; // Skip duplicate
+        }
+        
+        seen.add(key1);
+        seen.add(key2);
+        return true;
+      });
+      
+      setDocuments(deduplicated);
     } catch (error) {
       console.error("Error fetching processed documents:", error);
     } finally {
@@ -58,19 +76,34 @@ export function ProcessedDocumentsViewer() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/processed-documents/${documentId}`, {
+      // Delete from database first (using document_id from the processed document)
+      const dbDeleteResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/documents/${documentId}`, {
         method: 'DELETE'
       });
 
-      if (response.ok) {
+      // Also delete the processed JSON file
+      const jsonDeleteResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/processed-documents/${documentId}`, {
+        method: 'DELETE'
+      });
+
+      if (dbDeleteResponse.ok || jsonDeleteResponse.ok) {
         // Remove the document from the local state
         setDocuments(documents.filter(doc => doc.document_id !== documentId));
         // Close modal if the deleted document was selected
         if (selectedDocument?.document_id === documentId) {
           setSelectedDocument(null);
         }
+        
+        // Refresh the dashboard to update graphs
+        // Invalidate all queries to force refresh
+        if (typeof window !== 'undefined') {
+          // Use a small delay to ensure deletion is complete
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }
       } else {
-        const errorData = await response.json();
+        const errorData = await dbDeleteResponse.json().catch(() => ({ detail: 'Unknown error' }));
         alert(`Failed to delete document: ${errorData.detail || 'Unknown error'}`);
       }
     } catch (error) {
@@ -198,12 +231,18 @@ export function ProcessedDocumentsViewer() {
                   </span>
                 </div>
               )}
-              {doc.extracted_data.date && (
+              {/* Show due_date if it exists, otherwise show regular date */}
+              {doc.extracted_data.due_date ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4 text-amber-400" />
+                  <span className="text-amber-300" title="Due Date">Due: {doc.extracted_data.due_date}</span>
+                </div>
+              ) : doc.extracted_data.date ? (
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-slate-400" />
-                  <span className="text-slate-300">{doc.extracted_data.date}</span>
+                  <span className="text-slate-300" title="Document Date">{doc.extracted_data.date}</span>
                 </div>
-              )}
+              ) : null}
               {doc.extracted_data.vendor && (
                 <div className="flex items-center gap-2 text-sm">
                   <Building className="h-4 w-4 text-slate-400" />
@@ -290,6 +329,12 @@ export function ProcessedDocumentsViewer() {
                       {selectedDocument.extracted_data.currency} {selectedDocument.extracted_data.amount.toLocaleString()}
                     </p>
                   </div>
+                  {selectedDocument.extracted_data.due_date && (
+                    <div>
+                      <label className="text-sm text-slate-400">Due Date</label>
+                      <p className="text-amber-300">{selectedDocument.extracted_data.due_date}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Contact Info */}

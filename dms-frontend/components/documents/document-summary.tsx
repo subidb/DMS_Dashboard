@@ -39,8 +39,8 @@ export function DocumentSummary({ document }: { document: DocumentRecord }) {
         </div>
         {document.dueDate && (
           <div>
-            <dt className="text-xs uppercase tracking-wide text-slate-500">Expiry</dt>
-            <dd className="text-base text-slate-200">
+            <dt className="text-xs uppercase tracking-wide text-slate-500">Due Date</dt>
+            <dd className="text-base text-amber-300">
               {new Date(document.dueDate).toLocaleDateString()}
             </dd>
           </div>
