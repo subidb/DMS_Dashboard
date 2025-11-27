@@ -1,5 +1,5 @@
-import { DocumentsTable } from "@/components/documents/documents-table";
+import { ProcessedDocumentsViewer } from "@/components/documents/processed-documents-viewer";
 
 export default function DocumentsPage() {
-  return <DocumentsTable />;
+  return <ProcessedDocumentsViewer />;
 }

@@ -1,17 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { FileStack, ArrowRight, AlertTriangle, ShieldCheck, Settings } from "lucide-react";
+import { FileStack, ArrowRight, AlertTriangle, ShieldCheck, Settings, RefreshCw } from "lucide-react";
 import { useDashboardQuery } from "@/lib/queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { AlertsFeed } from "@/components/dashboard/alerts-feed";
 import { CategoryChart } from "@/components/dashboard/category-chart";
 import { ExceptionsPanel } from "@/components/dashboard/exceptions-panel";
 import { KpiGrid } from "@/components/dashboard/kpi-grid";
 import { UtilizationChart } from "@/components/dashboard/utilization-chart";
 import { UploadWidget } from "@/components/documents/upload-widget";
+import { RecentDocuments } from "@/components/dashboard/recent-documents";
 
 export function DashboardScreen() {
-  const { data, isLoading, isError, error } = useDashboardQuery();
+  const { data, isLoading, isError, error, refetch, isRefetching } = useDashboardQuery();
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Invalidate all related queries
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      queryClient.invalidateQueries({ queryKey: ["documents"] }),
+      queryClient.invalidateQueries({ queryKey: ["alerts"] }),
+      queryClient.invalidateQueries({ queryKey: ["exceptions"] }),
+      refetch()
+    ]);
+    setRefreshing(false);
+  };
 
   if (isLoading) {
     return (
@@ -31,11 +49,22 @@ export function DashboardScreen() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-white">Operations Pulse</h1>
-        <p className="text-sm text-slate-400">
-          Track intake velocity, spending utilization, and outstanding exceptions in real time.
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold text-white">Operations Pulse</h1>
+          <p className="text-sm text-slate-400">
+            Track intake velocity, spending utilization, and outstanding exceptions in real time.
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing || isRefetching}
+          className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-sm text-slate-300 hover:border-slate-600 hover:bg-slate-800 transition-colors disabled:opacity-50"
+          title="Refresh dashboard"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing || isRefetching ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </button>
       </div>
       
       {/* Quick Upload Section */}
@@ -123,9 +152,14 @@ export function DashboardScreen() {
         </div>
         <CategoryChart data={data.categorySplit} />
       </div>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ExceptionsPanel exceptions={data.exceptions.slice(0, 4)} />
-        <AlertsFeed alerts={data.alerts.slice(0, 5)} />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ExceptionsPanel exceptions={data.exceptions.slice(0, 4)} />
+            <AlertsFeed alerts={data.alerts.slice(0, 5)} />
+          </div>
+        </div>
+        <RecentDocuments />
       </div>
     </div>
   );

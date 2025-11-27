@@ -24,11 +24,6 @@ export function DocumentDetailScreen({ id }: { id: string }) {
         label: "Amount",
         value: `${document.currency} ${document.amount.toLocaleString()}`,
         confidence: 0.93
-      },
-      {
-        label: "Due Date",
-        value: document.dueDate ? new Date(document.dueDate).toLocaleDateString() : "—",
-        confidence: document.dueDate ? 0.88 : 0
       }
     ];
   }, [data]);
