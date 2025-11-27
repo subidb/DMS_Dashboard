@@ -73,9 +73,11 @@ processed/
 *.sqlite
 *.sqlite3
 
-# Documentation files (except main README)
+# Documentation files (except main README and deployment guides)
 *.md
 !/README.md
+!/DEPLOYMENT_GUIDE.md
+!/DEPLOYMENT_SUMMARY.md
 
 # TypeScript build info
 *.tsbuildinfo
@@ -87,11 +89,9 @@ Thumbs.db
 *.html
 test_*.py
 test_*.sh
-*.sh
 
-# Start scripts
+# Start scripts (keep start_with_backend.sh for local development)
 start.py
-start_*.sh
 
 # Database files
 *.db
@@ -103,3 +103,7 @@ env.example
 # Processed JSON files
 processed/
 backend/processed/
+
+# Frontend environment files (keep .env.example)
+dms-frontend/env.local
+dms-frontend/.env.local

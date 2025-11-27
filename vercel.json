@@ -1,0 +1,14 @@
+{
+  "buildCommand": "cd dms-frontend && npm install && npm run build",
+  "outputDirectory": "dms-frontend/.next",
+  "installCommand": "cd dms-frontend && npm install",
+  "framework": "nextjs",
+  "rootDirectory": "dms-frontend",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
+}
+
