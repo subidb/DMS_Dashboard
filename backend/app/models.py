@@ -21,6 +21,8 @@ class Document(Base):
     pdf_url = Column(String, nullable=True)
     file_path = Column(String, nullable=True)
     processed = Column(Boolean, default=False)
+    po_number = Column(String, nullable=True, index=True)  # PO number for linking invoices to POs
+    invoice_number = Column(String, nullable=True, index=True)  # Invoice number for reference
 
 class Exception(Base):
     __tablename__ = "exceptions"

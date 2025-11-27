@@ -15,6 +15,8 @@ class DocumentBase(BaseModel):
     confidence: float = 0.0
     linked_to: Optional[str] = None
     pdf_url: Optional[str] = None
+    po_number: Optional[str] = None
+    invoice_number: Optional[str] = None
 
 class DocumentCreate(DocumentBase):
     pass
@@ -31,6 +33,8 @@ class DocumentUpdate(BaseModel):
     confidence: Optional[float] = None
     linked_to: Optional[str] = None
     pdf_url: Optional[str] = None
+    po_number: Optional[str] = None
+    invoice_number: Optional[str] = None
 
 class Document(DocumentBase):
     id: str

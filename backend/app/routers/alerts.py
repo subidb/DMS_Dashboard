@@ -12,12 +12,26 @@ router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 async def get_alerts(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
+    acknowledged: bool = Query(None, description="Filter by acknowledged status. None returns all."),
     db: Session = Depends(get_db)
 ):
-    """Get list of alerts with pagination"""
+    """Get list of alerts with pagination. By default, returns unacknowledged alerts first."""
     try:
         alert_service = AlertService(db)
-        alerts = alert_service.get_alerts(skip=skip, limit=limit)
+        if acknowledged is None:
+            # Default: Get unacknowledged alerts first, then acknowledged
+            unacknowledged = alert_service.get_alerts(skip=0, limit=limit, acknowledged=False)
+            if len(unacknowledged) < limit:
+                acknowledged_alerts = alert_service.get_alerts(
+                    skip=0, 
+                    limit=limit - len(unacknowledged), 
+                    acknowledged=True
+                )
+                alerts = unacknowledged + acknowledged_alerts
+            else:
+                alerts = unacknowledged
+        else:
+            alerts = alert_service.get_alerts(skip=skip, limit=limit, acknowledged=acknowledged)
         return {"alerts": alerts}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch alerts: {str(e)}")

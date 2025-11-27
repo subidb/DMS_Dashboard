@@ -19,12 +19,37 @@ async def get_processed_documents():
         documents = []
         
         # Read all processed files
+        seen_document_ids = set()
+        seen_keys = set()  # For deduplication by title+amount+client
+        
         for filename in os.listdir(processed_dir):
             if filename.endswith('.json'):
                 file_path = os.path.join(processed_dir, filename)
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         data = json.load(f)
+                        
+                        # Skip if not successful
+                        if not data.get('success', False):
+                            continue
+                        
+                        # Deduplicate by document_id
+                        doc_id = data.get('document_id')
+                        if doc_id and doc_id in seen_document_ids:
+                            continue
+                        
+                        # Also deduplicate by title+amount+client
+                        extracted = data.get('extracted_data', {})
+                        title = extracted.get('title', '')
+                        amount = extracted.get('amount', 0)
+                        client = extracted.get('client', '')
+                        dedup_key = f"{title}_{amount}_{client}"
+                        
+                        if dedup_key in seen_keys:
+                            continue
+                        
+                        seen_document_ids.add(doc_id)
+                        seen_keys.add(dedup_key)
                         documents.append(data)
                 except Exception as e:
                     print(f"Error reading {filename}: {e}")
